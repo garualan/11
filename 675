@@ -1,0 +1,43 @@
+# Параметры симуляции
+v0   = 1.0  # Скорость
+eta  = 0.5  # случайный угол отклонения (в радианах)
+L    = 10   # размер области
+R    = 1    # радиус взаимодействия
+dt   = 0.2  # фаза
+Nt   = 200  # количество фаз
+N    = 500  # количество частиц
+
+# положения частицы 
+x = np.random.rand(N,1)*L
+y = np.random.rand(N,1)*L
+
+# скорость частицы
+theta = 2 * np.pi * np.random.rand(N,1)
+vx = v0 * np.cos(theta)
+vy = v0 * np.sin(theta)
+
+# Симуляция Main Loop
+for i in range(Nt):
+
+    # движение
+    x += vx*dt
+    y += vy*dt
+    
+    # применение периодических пограничных условий
+    x = x % L
+    y = y % L
+    
+    # найти средний угол соседей в диапазоне R
+    mean_theta = theta
+    for b in range(N):
+        neighbors = (x-x[b])**2+(y-y[b])**2 < R**2
+        sx = np.sum(np.cos(theta[neighbors]))
+        sy = np.sum(np.sin(theta[neighbors]))
+        mean_theta[b] = np.arctan2(sy, sx)
+        
+    # добавление случайного отклонения
+    theta = mean_theta + eta*(np.random.rand(N,1)-0.5)
+    
+    # изменение скорости
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
